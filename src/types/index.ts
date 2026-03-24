@@ -17,3 +17,9 @@ export interface VoteJokeInput {
 export interface DeleteJokeInput {
     id: Joke["id"];
 }
+
+export interface CreateUserInput {
+    fullname: string;
+    email: string;
+    password: string;
+}
