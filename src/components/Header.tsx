@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
-import { isLoggedIn } from "#/auth/fakeAuth";
+import { authClient } from "#/auth/auth-client";
 
 const primaryNavLinkClass =
   "border-b-2 border-transparent px-[0.05rem] py-[0.28rem] font-[650] text-[var(--ink-soft)] no-underline transition-colors duration-150 ease-in-out hover:text-[var(--ink-strong)]";
@@ -10,6 +10,9 @@ const disabledNavLinkClass =
   "cursor-not-allowed select-none opacity-45 hover:text-[var(--ink-soft)]";
 
 export default function Header() {
+  const { data: session } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
+
   const handleDisabledAddJokeClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!isLoggedIn) {
       event.preventDefault();
