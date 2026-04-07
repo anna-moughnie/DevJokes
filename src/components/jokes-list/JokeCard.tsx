@@ -1,5 +1,5 @@
 import { CommentsDrawer } from "#/components/CommentsDrawer";
-import { isLoggedIn } from "#/auth/fakeAuth";
+import { authClient } from "#/auth/auth-client";
 import type { Joke } from "#/types";
 import {
   ArrowBigDown,
@@ -30,6 +30,9 @@ export function JokeCard({
   onDelete,
   isDeleting,
 }: JokeCardProps) {
+  const { data: session } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
+
   const isDeleteDisabled = isDeleting || !isLoggedIn;
 
   return (

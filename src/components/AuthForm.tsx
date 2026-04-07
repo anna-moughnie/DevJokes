@@ -1,13 +1,37 @@
 import { Link } from "@tanstack/react-router";
 import type { SubmitEventHandler } from "react";
+import { createUser, signInUser } from "#/serverFunctions/userFns";
 
 interface AuthFormProps {
   mode: "signin" | "signup";
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
-  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const fullName = formData.get("fullName") as string | null;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (mode === "signup") {
+      await createUser({
+        data: {
+          fullname: fullName ?? "",
+          email,
+          password,
+        },
+      });
+    }
+    if (mode === "signin") {
+      await signInUser({
+        data: {
+          email,
+          password,
+        },
+      });
+    }
   };
 
   return (
