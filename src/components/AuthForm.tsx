@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type { SubmitEventHandler } from "react";
 import { createUser, signInUser } from "#/serverFunctions/userFns";
 
@@ -7,30 +7,40 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const navigate = useNavigate();
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
+    console.log("form sumbitted");
 
-    const formData = new FormData(event.currentTarget);
-    const fullName = formData.get("fullName") as string | null;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    try {
+      const formData = new FormData(event.currentTarget);
+      const fullName = formData.get("fullName") as string | null;
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-    if (mode === "signup") {
-      await createUser({
-        data: {
-          fullname: fullName ?? "",
-          email,
-          password,
-        },
-      });
-    }
-    if (mode === "signin") {
-      await signInUser({
-        data: {
-          email,
-          password,
-        },
-      });
+      if (mode === "signup") {
+        console.log("singup");
+        await createUser({
+          data: {
+            fullname: fullName ?? "",
+            email,
+            password,
+          },
+        });
+        await navigate({ to: "/" });
+      }
+      if (mode === "signin") {
+        const result = await signInUser({
+          data: {
+            email,
+            password,
+          },
+        });
+        console.log(result);
+        await navigate({ to: "/" });
+      }
+    } catch (error) {
+      console.log("auth error: ", error);
     }
   };
 
