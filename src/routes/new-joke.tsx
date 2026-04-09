@@ -7,6 +7,7 @@ import {
 import { createJoke } from "#/serverFunctions/jokeFns";
 import { useServerFn } from "@tanstack/react-start";
 import type { Joke } from "#/types";
+import { authClient } from "#/auth/auth-client";
 
 export const Route = createFileRoute("/new-joke")({
   component: NewJokePage,
@@ -14,6 +15,8 @@ export const Route = createFileRoute("/new-joke")({
 
 function NewJokePage() {
   const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
   const createJokeServerFn = useServerFn(createJoke);
   const { mutateAsync, isPending, error, reset } = useMutation<
     Joke,
