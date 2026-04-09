@@ -41,14 +41,6 @@ export const signOutUser = createServerFn({ method: "POST" }).handler(
   },
 );
 
-export async function getServerSession() {
-  const headers = getRequestHeaders();
-
-  return await auth.api.getSession({
-    headers,
-  });
-}
-
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
     const headers = getRequestHeaders();
@@ -58,13 +50,3 @@ export const getSession = createServerFn({ method: "GET" }).handler(
     });
   },
 );
-
-export async function requireServerSession() {
-  const session = await getServerSession();
-
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
-  return session;
-}

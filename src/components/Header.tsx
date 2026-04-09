@@ -12,7 +12,6 @@ const disabledNavLinkClass =
 export default function Header() {
   const { data: session } = authClient.useSession();
   const isLoggedIn = !!session?.user;
-  console.log(isLoggedIn);
 
   const handleDisabledAddJokeClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!isLoggedIn) {

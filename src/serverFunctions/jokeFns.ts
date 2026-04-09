@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { CreateJokeInput, DeleteJokeInput, VoteJokeInput } from "#/types";
-import { requireServerSession } from "./userFns";
+import { requireServerSession } from "#/dal/requireServerSession";
 
 export const getJokes = createServerFn({ method: "GET" }).handler(
   async ({ context }) => {
