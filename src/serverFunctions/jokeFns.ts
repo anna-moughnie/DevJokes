@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type {
   CreateJokeInput,
   DeleteJokeServiceInput,
-  VoteJokeInput,
+  VoteJokeServiceInput,
 } from "#/types";
 import { requireServerSession } from "#/dal/requireServerSession";
 
@@ -24,13 +24,22 @@ export const createJoke = createServerFn({ method: "POST" })
   });
 
 export const voteJoke = createServerFn({ method: "POST" })
-  .inputValidator((input: VoteJokeInput) => input)
+  .inputValidator((input: VoteJokeServiceInput) => input)
   .handler(async ({ data, context }) => {
-    return context.jokeService.voteJoke(data);
+    const session = await requireServerSession();
+    return context.jokeService.voteJoke({
+      id: data.id,
+      delta: data.delta,
+      userId: session.user.id,
+    });
   });
 
 export const deleteJoke = createServerFn({ method: "POST" })
   .inputValidator((input: DeleteJokeServiceInput) => input)
   .handler(async ({ data, context }) => {
-    return context.jokeService.deleteJoke(data);
+    const session = await requireServerSession();
+    return context.jokeService.deleteJoke({
+      id: data.id,
+      userId: session.user.id,
+    });
   });

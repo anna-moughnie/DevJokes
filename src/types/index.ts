@@ -21,6 +21,10 @@ export interface VoteJokeInput {
   delta: 1 | -1;
 }
 
+export interface VoteJokeServiceInput extends VoteJokeInput {
+  userId: string;
+}
+
 export interface DeleteJokeInput {
   id: Joke["id"];
 }

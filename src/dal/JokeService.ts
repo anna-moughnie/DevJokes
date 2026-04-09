@@ -2,15 +2,14 @@ import type {
   CreateJokeServiceInput,
   DeleteJokeServiceInput,
   Joke,
-  VoteJokeInput,
+  VoteJokeServiceInput,
 } from "#/types";
 import { and, eq, sql } from "drizzle-orm";
 import type { DbClient } from "./db/client";
-import { commentsTable, jokesTable } from "./db/schema";
+import { commentsTable, jokesTable, jokesVotesTable } from "./db/schema";
 
 export class JokeService {
   constructor(private readonly db: DbClient) {}
-
   async getJokes(): Promise<Joke[]> {
     const rows = await this.db.query.jokesTable.findMany({
       with: {
@@ -61,7 +60,26 @@ export class JokeService {
     };
   }
 
-  async voteJoke(input: VoteJokeInput): Promise<Joke> {
+  async voteJoke(input: VoteJokeServiceInput): Promise<Joke> {
+    const existingVote = await this.db.query.jokesVotesTable.findFirst({
+      where: and(
+        eq(jokesVotesTable.joke_id, input.id),
+        eq(jokesVotesTable.user_id, input.userId),
+      ),
+    });
+
+    let scoreDelta = 0;
+
+    if (!existingVote) {
+      await this.db.insert(jokesVotesTable).values({
+        joke_id: input.id,
+        user_id: input.userId,
+        delta: input.delta,
+      });
+      scoreDelta = input.delta;
+    } else if (existingVote.value !== input.delta) {
+    }
+
     const [updatedJokeRow] = await this.db
       .update(jokesTable)
       .set({
