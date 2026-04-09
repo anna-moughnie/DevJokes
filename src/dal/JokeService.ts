@@ -74,25 +74,46 @@ export class JokeService {
       await this.db.insert(jokesVotesTable).values({
         joke_id: input.id,
         user_id: input.userId,
-        delta: input.delta,
+        value: input.delta,
       });
       scoreDelta = input.delta;
     } else if (existingVote.value !== input.delta) {
+      await this.db
+        .update(jokesVotesTable)
+        .set({ value: input.delta })
+        .where(eq(jokesVotesTable.id, existingVote.id));
+      scoreDelta = input.delta - existingVote.value;
+    } else {
+      await this.db
+        .delete(jokesTable)
+        .where(eq(jokesVotesTable.id, existingVote.id));
     }
 
-    const [updatedJokeRow] = await this.db
-      .update(jokesTable)
-      .set({
-        score: sql<number>`${jokesTable.score} + ${input.delta}`,
-      })
-      .where(eq(jokesTable.id, input.id))
-      .returning({
-        id: jokesTable.id,
-        question: jokesTable.question,
-        answer: jokesTable.answer,
-        score: jokesTable.score,
-        author_id: jokesTable.author_id,
-      });
+    if (scoreDelta !== 0) {
+      await this.db
+        .update(jokesTable)
+        .set({ score: sql<number>`${jokesTable.score} + ${scoreDelta}` })
+        .where(eq(jokesTable.id, input.id));
+      scoreDelta = -existingVote!.value;
+    }
+
+    const updatedJokeRow = await this.db.query.jokesTable.findFirst({
+      where: eq(jokesTable.id, input.id),
+    });
+
+    // const [updatedJokeRow] = await this.db
+    //   .update(jokesTable)
+    //   .set({
+    //     score: sql<number>`${jokesTable.score} + ${input.delta}`,
+    //   })
+    //   .where(eq(jokesTable.id, input.id))
+    //   .returning({
+    //     id: jokesTable.id,
+    //     question: jokesTable.question,
+    //     answer: jokesTable.answer,
+    //     score: jokesTable.score,
+    //     author_id: jokesTable.author_id,
+    //   });
 
     if (!updatedJokeRow) {
       throw new Error("Joke not found.");
@@ -106,12 +127,19 @@ export class JokeService {
       orderBy: (comment, { asc }) => [asc(comment.createdAt)],
     });
 
-    const updatedJoke = {
-      ...updatedJokeRow,
+    // const updatedJoke = {
+    //   ...updatedJokeRow,
+    //   comments: comments.map((comment) => comment.body),
+    // };
+
+    return {
+      id: updatedJokeRow.id,
+      question: updatedJokeRow.question,
+      answer: updatedJokeRow.answer,
+      score: updatedJokeRow.score,
+      author_id: updatedJokeRow.author_id,
       comments: comments.map((comment) => comment.body),
     };
-
-    return updatedJoke;
   }
 
   async deleteJoke(input: DeleteJokeServiceInput): Promise<void> {
