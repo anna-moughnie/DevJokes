@@ -7,6 +7,7 @@ import {
 import { createJoke } from "#/serverFunctions/jokeFns";
 import { useServerFn } from "@tanstack/react-start";
 import type { Joke } from "#/types";
+import { authClient } from "#/auth/auth-client";
 
 export const Route = createFileRoute("/new-joke")({
   component: NewJokePage,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/new-joke")({
 
 function NewJokePage() {
   const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
   const createJokeServerFn = useServerFn(createJoke);
   const { mutateAsync, isPending, error, reset } = useMutation<
     Joke,
@@ -32,14 +34,15 @@ function NewJokePage() {
     const formData = new FormData(event.currentTarget);
     const question = String(formData.get("question") ?? "").trim();
     const answer = String(formData.get("answer") ?? "").trim();
+    const authorId = session?.user.id;
 
-    if (!question || !answer) return;
+    if (!question || !answer || !authorId) return;
 
     reset();
 
     try {
       await mutateAsync({
-        data: { question, answer },
+        data: { question, answer, authorId },
       });
 
       await navigate({ to: "/" });

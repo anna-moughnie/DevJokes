@@ -40,6 +40,7 @@ export class JokeService {
         question: input.question.trim(),
         answer: input.answer.trim(),
         score: 0,
+        author_id: input.authorId,
       })
       .returning({
         id: jokesTable.id,
