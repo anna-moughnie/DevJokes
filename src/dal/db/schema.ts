@@ -1,4 +1,3 @@
-import { email } from "better-auth";
 import { relations } from "drizzle-orm";
 import {
   integer,
@@ -9,11 +8,27 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
 export const jokesTable = pgTable("jokes", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   score: integer("score").notNull().default(0),
+  author_id: text("author_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -30,7 +45,11 @@ export const commentsTable = pgTable("comments", {
     .defaultNow(),
 });
 
-export const jokesRelations = relations(jokesTable, ({ many }) => ({
+export const jokesRelations = relations(jokesTable, ({ many, one }) => ({
+  user: one(user, {
+    fields: [jokesTable.author_id],
+    references: [user.id],
+  }),
   comments: many(commentsTable),
 }));
 
@@ -47,19 +66,6 @@ export const commentsRelations = relations(commentsTable, ({ one }) => ({
 //     email: text("email").notNull().unique(),
 //     password: text("password").notNull(),
 // });
-
-export const user = pgTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-});
 
 export const session = pgTable(
   "session",
@@ -123,6 +129,7 @@ export const verification = pgTable(
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  joke: many(jokesTable),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
