@@ -1,5 +1,5 @@
 import type {
-  CreateJokeInput,
+  CreateJokeServiceInput,
   DeleteJokeInput,
   Joke,
   VoteJokeInput,
@@ -33,7 +33,7 @@ export class JokeService {
     }));
   }
 
-  async createJoke(input: CreateJokeInput): Promise<Joke> {
+  async createJoke(input: CreateJokeServiceInput): Promise<Joke> {
     const [insertedJoke] = await this.db
       .insert(jokesTable)
       .values({

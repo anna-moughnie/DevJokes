@@ -7,6 +7,9 @@ export type Joke = Pick<JokeRow, "id" | "question" | "answer" | "score"> & {
 export interface CreateJokeInput {
   question: Joke["question"];
   answer: Joke["answer"];
+}
+
+export interface CreateJokeServiceInput extends CreateJokeInput {
   authorId: string;
 }
 

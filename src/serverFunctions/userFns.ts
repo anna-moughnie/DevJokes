@@ -41,6 +41,14 @@ export const signOutUser = createServerFn({ method: "POST" }).handler(
   },
 );
 
+export async function getServerSession() {
+  const headers = getRequestHeaders();
+
+  return await auth.api.getSession({
+    headers,
+  });
+}
+
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
     const headers = getRequestHeaders();
@@ -51,17 +59,12 @@ export const getSession = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export const requireSession = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const headers = getRequestHeaders();
+export async function requireServerSession() {
+  const session = await getServerSession();
 
-    const session = await auth.api.getSession({ headers });
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
 
-    if (!session) {
-      // this is temporary I'm not sure if I have to do some proper error handling with this yet
-      throw new Error("unauthorized");
-    }
-
-    return session;
-  },
-);
+  return session;
+}
