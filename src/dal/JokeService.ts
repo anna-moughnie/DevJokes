@@ -85,8 +85,9 @@ export class JokeService {
       scoreDelta = input.delta - existingVote.value;
     } else {
       await this.db
-        .delete(jokesTable)
+        .delete(jokesVotesTable)
         .where(eq(jokesVotesTable.id, existingVote.id));
+      scoreDelta = -existingVote!.value;
     }
 
     if (scoreDelta !== 0) {
@@ -94,7 +95,6 @@ export class JokeService {
         .update(jokesTable)
         .set({ score: sql<number>`${jokesTable.score} + ${scoreDelta}` })
         .where(eq(jokesTable.id, input.id));
-      scoreDelta = -existingVote!.value;
     }
 
     const updatedJokeRow = await this.db.query.jokesTable.findFirst({
