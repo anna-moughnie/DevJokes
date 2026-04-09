@@ -1,5 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { CreateJokeInput, DeleteJokeInput, VoteJokeInput } from "#/types";
+import type {
+  CreateJokeInput,
+  DeleteJokeServiceInput,
+  VoteJokeInput,
+} from "#/types";
 import { requireServerSession } from "#/dal/requireServerSession";
 
 export const getJokes = createServerFn({ method: "GET" }).handler(
@@ -26,7 +30,7 @@ export const voteJoke = createServerFn({ method: "POST" })
   });
 
 export const deleteJoke = createServerFn({ method: "POST" })
-  .inputValidator((input: DeleteJokeInput) => input)
+  .inputValidator((input: DeleteJokeServiceInput) => input)
   .handler(async ({ data, context }) => {
     return context.jokeService.deleteJoke(data);
   });

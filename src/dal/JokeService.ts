@@ -1,10 +1,10 @@
 import type {
   CreateJokeServiceInput,
-  DeleteJokeInput,
+  DeleteJokeServiceInput,
   Joke,
   VoteJokeInput,
 } from "#/types";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { DbClient } from "./db/client";
 import { commentsTable, jokesTable } from "./db/schema";
 
@@ -29,6 +29,7 @@ export class JokeService {
       question: row.question,
       answer: row.answer,
       score: row.score,
+      author_id: row.author_id,
       comments: row.comments.map((comment) => comment.body),
     }));
   }
@@ -47,6 +48,7 @@ export class JokeService {
         question: jokesTable.question,
         answer: jokesTable.answer,
         score: jokesTable.score,
+        author_id: jokesTable.author_id,
       });
 
     if (!insertedJoke) {
@@ -71,6 +73,7 @@ export class JokeService {
         question: jokesTable.question,
         answer: jokesTable.answer,
         score: jokesTable.score,
+        author_id: jokesTable.author_id,
       });
 
     if (!updatedJokeRow) {
@@ -93,10 +96,15 @@ export class JokeService {
     return updatedJoke;
   }
 
-  async deleteJoke(input: DeleteJokeInput): Promise<void> {
+  async deleteJoke(input: DeleteJokeServiceInput): Promise<void> {
     const result = await this.db
       .delete(jokesTable)
-      .where(eq(jokesTable.id, input.id));
+      .where(
+        and(
+          eq(jokesTable.id, input.id),
+          eq(jokesTable.author_id, input.userId),
+        ),
+      );
 
     const wasDeleted = Number(result.rowCount ?? 0) > 0;
 

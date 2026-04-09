@@ -1,6 +1,9 @@
 import type { CommentRow, JokeRow } from "#/dal/db/schema";
 
-export type Joke = Pick<JokeRow, "id" | "question" | "answer" | "score"> & {
+export type Joke = Pick<
+  JokeRow,
+  "id" | "question" | "answer" | "score" | "author_id"
+> & {
   comments: CommentRow["body"][];
 };
 
@@ -20,6 +23,10 @@ export interface VoteJokeInput {
 
 export interface DeleteJokeInput {
   id: Joke["id"];
+}
+
+export interface DeleteJokeServiceInput extends DeleteJokeInput {
+  userId: string;
 }
 
 export interface CreateUserInput {
